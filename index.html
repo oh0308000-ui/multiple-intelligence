@@ -169,7 +169,7 @@ button{width:100%;border:0;border-radius:11px;background:#222;color:#fff;font-si
     </div>
     <div class="field">
       <label for="userPhone">전화번호 *</label>
-      <input id="userPhone" type="tel" placeholder="010-1234-5678" maxlength="20">
+      <input id="userPhone" type="tel" placeholder="010-0000-0000" maxlength="13" inputmode="numeric" autocomplete="tel" oninput="formatPhoneNumber(this)">
     </div>
   </div>
   <div class="consent">
@@ -405,6 +405,14 @@ document.getElementById("progressBar").style.width=`${done/questions.length*100}
 }
 
 
+
+function formatPhoneNumber(input){
+  let v=input.value.replace(/\D/g,"").slice(0,11);
+  if(v.length<=3) input.value=v;
+  else if(v.length<=7) input.value=v.slice(0,3)+"-"+v.slice(3);
+  else input.value=v.slice(0,3)+"-"+v.slice(3,7)+"-"+v.slice(7,11);
+}
+
 function getUserInfo(){
   const name=document.getElementById("userName").value.trim();
   const phone=document.getElementById("userPhone").value.trim();
@@ -412,6 +420,11 @@ function getUserInfo(){
   if(!name || !phone){
     alert("이름과 전화번호를 입력해 주세요.");
     document.querySelector(".info-section").scrollIntoView({behavior:"smooth"});
+    return null;
+  }
+  if(!/^010-\d{4}-\d{4}$/.test(phone)){
+    alert("전화번호는 010-0000-0000 형식으로 입력해 주세요.");
+    document.getElementById("userPhone").focus();
     return null;
   }
   if(!consent){
