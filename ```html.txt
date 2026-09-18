@@ -1,0 +1,546 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다중지능 검사</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f5f7fb;
+      color: #222;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px 60px;
+    }
+
+    header {
+      background: white;
+      padding: 35px 30px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+    }
+
+    .description {
+      color: #666;
+      margin: 0;
+    }
+
+    .question {
+      background: white;
+      margin-bottom: 14px;
+      padding: 22px 24px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .question-number {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 5px;
+    }
+
+    .question-text {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .score-option {
+      position: relative;
+    }
+
+    .score-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .score-option label {
+      display: block;
+      text-align: center;
+      padding: 11px 5px;
+      border: 2px solid #e0e3e8;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.15s;
+      background: white;
+    }
+
+    .score-option label:hover {
+      border-color: #777;
+      background: #f8f8f8;
+    }
+
+    .score-option input:checked + label {
+      background: #222;
+      color: white;
+      border-color: #222;
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      color: #999;
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .progress-box {
+      position: sticky;
+      bottom: 15px;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      margin-top: 25px;
+      z-index: 10;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .progress {
+      height: 8px;
+      background: #e9ebef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #222;
+      transition: width 0.2s;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: #222;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    #result {
+      display: none;
+      background: white;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .result-title {
+      font-size: 25px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .result-item {
+      margin-bottom: 18px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .result-bar {
+      height: 12px;
+      background: #e9ebef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .result-fill {
+      height: 100%;
+      background: #222;
+      border-radius: 10px;
+    }
+
+    .notice {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f5f6f8;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin-top: 20px;
+        padding: 0 12px 40px;
+      }
+
+      header {
+        padding: 25px 20px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      .question {
+        padding: 18px;
+      }
+
+      .question-text {
+        font-size: 16px;
+      }
+
+      .scores {
+        gap: 5px;
+      }
+
+      .score-option label {
+        padding: 10px 3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>다중지능 검사</h1>
+    <p class="description">
+      각 문항을 읽고 자신에게 얼마나 해당하는지 1~5점으로 선택해 주세요.
+    </p>
+  </header>
+
+  <form id="testForm"></form>
+
+  <div class="progress-box">
+    <div class="progress-text">
+      <span>검사 진행률</span>
+      <span id="progressText">0 / 63</span>
+    </div>
+
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <button type="button" onclick="showResult()">
+      결과 보기
+    </button>
+  </div>
+
+  <div id="result">
+    <div class="result-title">나의 다중지능 결과</div>
+    <div id="resultContent"></div>
+
+    <div class="notice">
+      ※ 이 결과는 각 문항에 대한 자기평가를 바탕으로 계산한 참고용 결과입니다.
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+const intelligence = {
+  1: "음악지능",
+  2: "신체운동지능",
+  3: "논리수학지능",
+  4: "공간지능",
+  5: "언어지능",
+  6: "대인관계지능",
+  7: "자기이해지능",
+  8: "자연탐구지능",
+  9: "영성지능"
+};
+
+const questions = [
+
+[6, "친구나 가족들의 고민거리를 들어 주거나 해결하는 것을 좋아한다."],
+[2, "운동 경기를 보면 운동선수들의 장단점을 잘 집어낸다."],
+[8, "자동차에 관심이 많고, 각각의 공통점과 차이점을 알고 있다."],
+[4, "손으로 물건을 만들고, 그림을 그리는 것을 좋아한다."],
+[1, "취미 생활로 악기 연주나 음악 감상을 즐긴다."],
+[5, "다른 사람보다 어휘력이 풍부한 편이다."],
+[3, "어떤 일이든 실험하고 검증하는 것을 좋아한다."],
+[7, "나 자신을 되돌아보고, 앞으로의 생활을 계획하는 것을 좋아한다."],
+[9, "자원봉사나 재능기부, 비영리 활동에 쓰는 시간이 1년에 30일 이상이다."],
+[2, "평소에 몸을 움직이며 활동하는 것을 좋아한다."],
+[5, "글이나 문서를 읽을 때 문법적으로 어색한 문장을 잘 찾아낸다."],
+[7, "나의 건강 상태나 기분, 컨디션을 정확히 파악할 수 있다."],
+[4, "어림짐작으로도 길이나 넓이를 비교적 잘 알아맞힌다."],
+[1, "악보를 보면 그 곡의 멜로디를 어느 정도 알 수 있다."],
+[6, "직장 내 성희롱이 왜 발생하고 어떻게 해결하면 좋을지 알고 있다."],
+[3, "학교 다닐 때 수학이나 과학과목을 좋아했다."],
+[8, "옷이나 가방을 보면 어떤 브랜드인지 바로 알아맞힐 수 있다."],
+[9, "주변 사람들의 삶에 적극적으로 관심을 갖고 있다."],
+[1, "다른 사람의 연주나 노래를 들으면 어떤 점이 부족한지 알 수 있다."],
+[7, "내 생각이나 감정을 상황에 맞게 잘 통제하고 조절한다."],
+[4, "다른 사람의 그림을 보고 평가를 잘 할 수 있다."],
+[5, "나의 어렸을 때 꿈은 작가나 아나운서였다."],
+[9, "나의 비전이나 이상으로 인해, 개인과 단체의 유익에 해가 간다면 포기한다."],
+[6, "다른 사람들로부터 다정다감하다는 소리를 자주 듣는다."],
+[2, "어떤 운동이라도 한두번 해보면 잘 할 수 있다."],
+[8, "동물이나 식물에 관하여 많은 정보를 알고 있다."],
+[3, "다른 사람의 말 속에서 비논리적인 점을 잘 찾아낸다."],
+[6, "직장 동료나 상사의 기분을 잘 파악하고 적절하게 대처한다."],
+[2, "운동을 잘한다는 말을 자주 듣는다."],
+[4, "내 방이나 사무실을 꾸밀 때, 어떤 재료를 사용해야 하고 어떻게 배치해야 할 지 잘 알아낸다."],
+[1, "다른 사람과 노래할 때 화음을 잘 넣는다."],
+[5, "글을 조리 있고 설득력 있게 쓴다는 말을 자주 듣는다."],
+[8, "동물이나 식물을 좋아하고 잘 돌본다."],
+[7, "평소에 내 능력이나 재능을 계발하기 위해 노력하고 있다."],
+[3, "회사 생활에서 발생하는 문제를 해결하는 절차와 방법을 잘 알고있다."],
+[9, "소중하게 생각하는 신념이나 가치를 위해 다른 사람들의 반대를 무릅쓰고 주장한 적이 있다."],
+[1, "악기를 연주할 때 곡의 음정, 리듬, 빠르기, 분위기를 정확하게 표현한다."],
+[6, "가족이나 직장 동료, 상사 등 누구와도 잘 지내는 편이다."],
+[8, "나는 현재 동식물과 관련된 직업에 종사하고 있다."],
+[4, "다른 사람으로부터 그림 그리기나 만들기를 잘한다고 칭찬 받은 적이 있다."],
+[2, "뜨개질이나 조각, 조립과 같이 섬세한 손놀림이 필요한 활동을 잘할 수 있다."],
+[5, "책이나 신문의 사설을 읽을 떄 그 내용을 잘 이해한다."],
+[3, "물건의 가격이나 은행 이자 등을 잘 계산한다."],
+[7, "내 일정을 다이어리에 정리하는 등 규칙적인 생활을 위해 노력한다."],
+[9, "무의미하다고 느껴진 적이 있다."],
+[7, "어떤 일이 실패했을 때 그 원인을 철저히 분석해서, 다음에는 그런 일이 생기지 않도록 노력한다."],
+[2, "개그맨이나 탤런트, 주변 사람들의 행동을 잘 흉내 낼 수 있다."],
+[3, "어떤 것을 암기할 때 무작정 외우기보다는 논리적으로 이해하여 암기하곤 한다."],
+[1, "어떤 악기라도 연주법을 비교적 쉽게 배운다."],
+[4, "새로운 지식을 습득할 때 그림이나 개념 지도를 그려 가며 배운다."],
+[6, "내가 속한 집단에서 내가 해야 할 일을 잘 찾아서 수행한다."],
+[9, "스스로에게 초월적인 힘이 있다고 의식하며 산다"],
+[8, "동식물이나 특정 사물이 갖는 특징을 분석하는 것을 좋아한다."],
+[5, "학교 다닐 때 국어 시간이나 글쓰기 시간을 좋아했다."],
+[7, "앞으로 어떻게 성공해야 할지에 대해 뚜렷한 신념을 가지고 있다."],
+[2, "연기나 춤으로 내가 전하고자 하는 것을 잘 표현할 수 있다."],
+[4, "고장 난 기계나 물건을 잘 고친다."],
+[1, "빈칸을 주고 어떤 곡을 채워보라고 하면 박자와 전체 곡의 분위기에 맞게 채울 수 있다."],
+[8, "환경 문제를 해결할 수 있는 방법들을 많이 알고 있다."],
+[6, "다른 사람들 앞에서 프레젠테이션이나 연설을 잘한다."],
+[3, "어떤 문제가 생기면 성급하게 결론을 내리기보다는 여러가지로 그 원인을 밝히려고 한다."],
+[5, "다른 사람이 하는 말의 핵심을 잘 파악한다."],
+[9, "스스로의 삶이 만족스럽다고 느끼는 순간이 자주 있다."]
+
+];
+
+const form = document.getElementById("testForm");
+
+questions.forEach((question, index) => {
+
+  const [type, text] = question;
+  const number = index + 1;
+
+  const div = document.createElement("div");
+  div.className = "question";
+
+  div.innerHTML = `
+    <div class="question-number">
+      문항 ${number} · ${intelligence[type]}
+    </div>
+
+    <div class="question-text">
+      ${text}
+    </div>
+
+    <div class="scores">
+      ${[1,2,3,4,5].map(score => `
+        <div class="score-option">
+          <input
+            type="radio"
+            id="q${number}_${score}"
+            name="q${number}"
+            value="${score}"
+            onchange="updateProgress()"
+          >
+          <label for="q${number}_${score}">
+            ${score}
+          </label>
+        </div>
+      `).join("")}
+    </div>
+
+    <div class="scale">
+      <span>전혀 그렇지 않다</span>
+      <span>매우 그렇다</span>
+    </div>
+  `;
+
+  form.appendChild(div);
+});
+
+
+function updateProgress() {
+
+  let completed = 0;
+
+  questions.forEach((_, index) => {
+    const selected =
+      document.querySelector(`input[name="q${index + 1}"]:checked`);
+
+    if (selected) completed++;
+  });
+
+  const percent = (completed / questions.length) * 100;
+
+  document.getElementById("progressText").textContent =
+    `${completed} / ${questions.length}`;
+
+  document.getElementById("progressBar").style.width =
+    `${percent}%`;
+}
+
+
+function showResult() {
+
+  const scores = {};
+
+  for (let i = 1; i <= 9; i++) {
+    scores[i] = [];
+  }
+
+  let unanswered = [];
+
+  questions.forEach((question, index) => {
+
+    const questionNumber = index + 1;
+    const type = question[0];
+
+    const selected =
+      document.querySelector(
+        `input[name="q${questionNumber}"]:checked`
+      );
+
+    if (!selected) {
+      unanswered.push(questionNumber);
+    } else {
+      scores[type].push(Number(selected.value));
+    }
+  });
+
+  if (unanswered.length > 0) {
+
+    alert(
+      `아직 답하지 않은 문항이 ${unanswered.length}개 있습니다.\n\n` +
+      `문항 번호: ${unanswered.join(", ")}`
+    );
+
+    document.querySelector(
+      `input[name="q${unanswered[0]}"]`
+    ).closest(".question").scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    return;
+  }
+
+
+  const results = [];
+
+  for (let i = 1; i <= 9; i++) {
+
+    const total =
+      scores[i].reduce((sum, value) => sum + value, 0);
+
+    const average =
+      total / scores[i].length;
+
+    results.push({
+      type: i,
+      name: intelligence[i],
+      total: total,
+      average: average
+    });
+  }
+
+
+  results.sort((a, b) => b.average - a.average);
+
+
+  const resultContent =
+    document.getElementById("resultContent");
+
+  resultContent.innerHTML = results.map((item, index) => {
+
+    const percentage = (item.average / 5) * 100;
+
+    return `
+      <div class="result-item">
+
+        <div class="result-header">
+          <span>
+            ${index + 1}. ${item.name}
+          </span>
+
+          <span>
+            ${item.average.toFixed(2)} / 5
+          </span>
+        </div>
+
+        <div class="result-bar">
+          <div
+            class="result-fill"
+            style="width:${percentage}%"
+          ></div>
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+
+
+  const result = document.getElementById("result");
+
+  result.style.display = "block";
+
+  result.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+</script>
+
+</body>
+</html>
+```
