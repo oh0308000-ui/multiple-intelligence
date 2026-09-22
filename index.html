@@ -115,6 +115,16 @@ button{width:100%;border:0;border-radius:11px;background:#222;color:#fff;font-si
 }
 .question.unanswered .qmeta{color:#c22;font-weight:700}
 
+
+.score-chart{margin:0 0 22px;padding:20px;background:#f7f8fa;border-radius:14px;}
+.score-chart h3{margin:0 0 5px;font-size:20px;}
+.score-chart .chart-sub{margin:0 0 16px;color:#666;font-size:13px;}
+.chart-row{display:grid;grid-template-columns:118px 1fr 48px;align-items:center;gap:10px;margin:10px 0;}
+.chart-label{font-size:14px;font-weight:700;white-space:nowrap;}
+.chart-track{height:18px;background:#e4e7eb;border-radius:999px;overflow:hidden;}
+.chart-fill{height:100%;background:#222;border-radius:999px;transition:width .45s ease;}
+.chart-value{text-align:right;font-weight:800;font-size:14px;}
+@media(max-width:600px){.chart-row{grid-template-columns:92px 1fr 44px;gap:7px}.chart-label{font-size:12px}.chart-track{height:15px}}
 </style>
 </head>
 <body>
@@ -148,6 +158,11 @@ button{width:100%;border:0;border-radius:11px;background:#222;color:#fff;font-si
 
 <section id="result">
 <div class="result-title">나의 다중지능 결과</div>
+<div id="scoreChart" class="score-chart" style="display:none">
+  <h3>지능별 점수</h3>
+  <p class="chart-sub">각 영역의 평균 점수를 5점 만점으로 비교해 볼 수 있습니다.</p>
+  <div id="scoreChartContent"></div>
+</div>
 <div id="myChoiceSummary" class="compare" style="margin-bottom:18px">
   <h3 style="margin-top:0">처음에 내가 선택한 재능</h3>
   <div id="myChoiceContent"></div>
@@ -577,6 +592,16 @@ const total=scores[i].reduce((a,b)=>a+b,0);
 results.push({id:i,name:intelligence[i],total,avg:total/scores[i].length});
 }
 results.sort((a,b)=>b.avg-a.avg);
+
+const chartContent = document.getElementById("scoreChartContent");
+chartContent.innerHTML = results.map(r => `
+  <div class="chart-row">
+    <div class="chart-label">${r.name}</div>
+    <div class="chart-track"><div class="chart-fill" style="width:${(r.avg/5)*100}%"></div></div>
+    <div class="chart-value">${r.avg.toFixed(2)}</div>
+  </div>
+`).join("");
+document.getElementById("scoreChart").style.display="block";
 
 document.getElementById("resultContent").innerHTML=results.map((r,idx)=>{
 const g=guide[r.id];
